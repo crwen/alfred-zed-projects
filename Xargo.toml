@@ -1,0 +1,4 @@
+
+# [dependencies]
+[target.x86_64-apple-darwin.dependencies]
+std = { default-features = false }
