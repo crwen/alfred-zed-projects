@@ -21,6 +21,23 @@ You can download workflow file, or compile your own program.
 
 ### Build Instructions
 
+#### Quick Build (Recommended)
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/crwen/alfred-zed-projects.git
+   cd alfred-zed-projects
+   ```
+
+2. Run the build script:
+   ```bash
+   ./build-workflow.sh
+   ```
+
+3. Install the generated `alfred-zed-projects.alfredworkflow` file by double-clicking it.
+
+#### Manual Build
+
 1. Clone the repository:
    ```bash
    git clone https://github.com/crwen/alfred-zed-projects.git
@@ -32,14 +49,12 @@ You can download workflow file, or compile your own program.
    cargo build --release
    ```
 
-3. The compiled binary will be located at `target/release/alfred-zed`
-
-4. Copy the binary to the workflow directory:
+3. Copy the binary to the workflow directory:
    ```bash
    cp target/release/alfred-zed workflow/alfred-zed
    ```
 
-5. Install the workflow by double-clicking the `workflow` folder or importing it into Alfred.
+4. Install the workflow by double-clicking the `workflow` folder or importing it into Alfred.
 
 ## Usage
 
