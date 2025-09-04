@@ -2,10 +2,13 @@ use dirs::config_dir;
 use serde::Serialize;
 use std::io;
 
+mod constants;
+use crate::constants::*;
+
 #[derive(Debug)]
 struct Workspace {
     workspace_id: i64,
-    local_paths: Vec<u8>,
+    local_paths: String,
 }
 
 #[derive(Serialize, Debug)]
@@ -19,10 +22,7 @@ struct Item {
 
 impl From<Workspace> for Item {
     fn from(workspace: Workspace) -> Self {
-        let path = String::from_utf8_lossy(&workspace.local_paths)
-            .into_owned()
-            .as_str()
-            .to_owned();
+        let path = workspace.local_paths;
         let index = path.find('/').unwrap_or(path.len());
         let path = path.split_at(index).1;
         let name = path.trim_end_matches('/').split('/').last().unwrap_or("");
@@ -46,7 +46,7 @@ impl Icon {
     fn new(path: String) -> Icon {
         Icon {
             path,
-            r#type: String::from("fileicon"),
+            r#type: ICON_TYPE_FILE.to_string(),
         }
     }
 }
@@ -59,19 +59,19 @@ struct Response {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Alfred passes in a single argument for the user query.
     let query = std::env::args().nth(1);
-    let path = config_dir().unwrap().to_str().unwrap().to_owned() + "/Zed/db/0-stable/db.sqlite";
+    let path = config_dir().unwrap().to_str().unwrap().to_owned() + DB_PATH;
     let connection = sqlite::open(path).unwrap();
-    let stmt = connection.prepare(
-        "SELECT workspace_id, local_paths
+    let stmt = connection.prepare(format!(
+        "SELECT {DB_FIELD_WORKSPACE_ID}, {DB_FIELD_PATHS}
             FROM workspaces
-            WHERE local_paths IS NOT NULL
-            ORDER BY timestamp DESC",
-    )?;
+            WHERE {DB_FIELD_PATHS} IS NOT NULL
+            ORDER BY timestamp DESC"
+    ))?;
     let mut items = vec![];
     for row in stmt.into_iter().map(|row| row.unwrap()) {
         let workspace = Workspace {
-            workspace_id: row.read::<i64, _>("workspace_id").to_owned(),
-            local_paths: row.read::<&[u8], _>("local_paths").to_vec(),
+            workspace_id: row.read::<i64, _>(DB_FIELD_WORKSPACE_ID).to_owned(),
+            local_paths: row.read::<&str, _>(DB_FIELD_PATHS).to_string(),
         };
         let item = Item::from(workspace);
         items.push(item);
